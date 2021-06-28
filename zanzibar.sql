@@ -105,7 +105,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION zanzibar_enumerate (p_subject text, p_relation text, p_object_namespace text)
+CREATE OR REPLACE FUNCTION zanzibar_enumerate (p_subject text, p_relation text, p_object_namespace text, p_seen text[] DEFAULT '{}' ::text[])
   RETURNS TABLE (
     r_object_namespace text,
     r_object text,
@@ -114,7 +114,8 @@ CREATE OR REPLACE FUNCTION zanzibar_enumerate (p_subject text, p_relation text, 
   LANGUAGE plpgsql
 AS $$
 DECLARE
-  var_r record;
+    rel text;
+    var_r record;
 BEGIN
     FOR var_r IN (
       SELECT
@@ -131,14 +132,18 @@ BEGIN
       ORDER BY
         subject_relation NULLS FIRST)
       LOOP
-        IF var_r.object_namespace = p_object_namespace AND var_r.relation = p_relation THEN
-          r_object_namespace := var_r.object_namespace;
-          r_object := var_r.object;
-          r_relation := var_r.relation;
-          r_subject := var_r.subject;
-          RETURN NEXT;
-        ELSE
-          RETURN QUERY SELECT * FROM zanzibar_enumerate (var_r.object, p_relation, p_object_namespace);
+        rel := var_r.object || '#' || var_r.relation;
+        IF array_position(p_seen, rel) IS NULL THEN
+            p_seen := array_append(p_seen, rel);
+           IF var_r.object_namespace = p_object_namespace AND var_r.relation = p_relation THEN
+              r_object_namespace := var_r.object_namespace;
+              r_object := var_r.object;
+              r_relation := var_r.relation;
+              r_subject := var_r.subject;
+              RETURN NEXT;
+            ELSE
+             RETURN QUERY SELECT * FROM zanzibar_enumerate (var_r.object, p_relation, p_object_namespace, p_seen);
+            END IF;
         END IF;
       END LOOP;
 END;
