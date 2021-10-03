@@ -37,3 +37,4 @@ No subject-set rewrites meaning that all tuples to be evaluated need to be mater
 * [Ory Keto](https://www.ory.sh/keto/) - An open-source Go implemenation of Zanzibar.
 * [access-controller](https://github.com/authorizer-tech/access-controller) - Another Go implementation of Zanzibar, seems further along than Keto w.r.t distributed operation in particular.
 * [authzed](https://authzed.com/) - SaaS that implements the Zanzibar API with slight tweaks for better multi-tenancy.
+* [SpiceDB](https://github.com/authzed/spicedb) - Open-source implementation of Zanzibar behind [authzed](https://authzed.com/), looks to be the most production ready and supports PostgreSQL and CockroachDB for storage.
